@@ -1,3 +1,7 @@
+import 'dart:developer';
+
+import 'package:azooz_diver/provider/home_provider/contact_proider.dart';
+
 import 'bottom_sheet/bottom_sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +12,8 @@ import 'bottom_navigation_bar_units/archived_tasks.dart';
 import 'bottom_navigation_bar_units/done_tasks.dart';
 import 'bottom_navigation_bar_units/new_tasks.dart';
 import 'bottom_navigation_bar_units/settings.dart';
+import 'package:provider/provider.dart';
+
 
 
 class HomeView extends StatefulWidget {
@@ -22,19 +28,10 @@ class _HomeViewState extends State<HomeView> {
   List<String>titles =['New Tasks','Done Tasks','Archived Tasks','Settings'];
   int currentIndex = 0;
   IconData floatIcon=Icons.add;
-  bool isShowingBottomSheet= false;
   final GlobalKey<ScaffoldState> scaffoldKey =  GlobalKey<ScaffoldState>();
-  final GlobalKey<FormState> formKey =  GlobalKey<FormState>();
   SqfLiteClient client = SqfLiteClient() ;
-  TextEditingController nameController = TextEditingController();
-  TextEditingController addressController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   client.createTable();
-  // }
+
 
   @override
   Widget build(BuildContext context) {
@@ -42,57 +39,55 @@ class _HomeViewState extends State<HomeView> {
       key:scaffoldKey,
        appBar:  CustomAppBar(title:  titles[currentIndex],),
       backgroundColor: Colors.white.withOpacity(0.9),
-      bottomNavigationBar: MoltenBottomNavigationBar(
-        barColor: Colors.white,
-        selectedIndex: currentIndex,
-        domeCircleColor: Colors.grey.withOpacity(0.5),
-        duration:const Duration(milliseconds: 250),
-        domeHeight: 20,
-        barHeight: 70,
-        curve: Curves.elasticOut,
-        borderRaduis:  const BorderRadius.only(
-            topRight:Radius.circular(35) ,
-            topLeft:Radius.circular(35) ),
-        onTabChange: (index){
-          setState(() {
-            currentIndex=index;
-            pageController.animateToPage(index,
-                curve: Curves.elasticOut,
-                duration: const Duration(milliseconds: 250));
+      bottomNavigationBar: SafeArea(
+        child: MoltenBottomNavigationBar(
+          barColor: Colors.white,
+          selectedIndex: currentIndex,
+          domeCircleColor: Colors.grey.withOpacity(0.5),
+          duration:const Duration(milliseconds: 250),
+          domeHeight: 20,
+          barHeight: 70,
+          curve: Curves.elasticOut,
+          borderRaduis:  const BorderRadius.only(
+              topRight:Radius.circular(35) ,
+              topLeft:Radius.circular(35) ),
+          onTabChange: (index){
+            setState(() {
+              currentIndex=index;
+              pageController.animateToPage(index,
+                  curve: Curves.elasticOut,
+                  duration: const Duration(milliseconds: 250));
 
-            if (kDebugMode) {
-              print(currentIndex);
-            }
-          });
+              if (kDebugMode) {
+                print(currentIndex);
+              }
+            });
 
-        },
-        tabs: [
-          MoltenTab(
-              unselectedColor: Colors.grey.withOpacity(0.8),
-            selectedColor: Colors.black,
-            icon: const Icon(Icons.menu),
-            title: const Text('New Tasks')),
-          MoltenTab(
-            unselectedColor: Colors.grey.withOpacity(0.8),
+          },
+          tabs: [
+            MoltenTab(
+                unselectedColor: Colors.grey.withOpacity(0.8),
               selectedColor: Colors.black,
-              icon: const Icon(Icons.check_circle_outline,),
-              title: const Text('Done Tasks')),
-          MoltenTab(
+              icon: const Icon(Icons.menu),
+              title: const Text('New Tasks')),
+            MoltenTab(
               unselectedColor: Colors.grey.withOpacity(0.8),
-              selectedColor: Colors.black,
-              icon: const Icon(Icons.archive,),
-              title: const Text('Archive Tasks')),
-          MoltenTab(
-              unselectedColor: Colors.grey.withOpacity(0.8),
-              selectedColor: Colors.black,
-              icon: const Icon(Icons.settings,),
-              title: const Text('Settings')),
-          // MoltenTab(
-          //     unselectedColor: Colors.grey.withOpacity(0.8),
-          //     selectedColor: Colors.black,
-          //     icon: const Icon(Icons.shopping_cart,),
-          //     title: const Text('Cart')),
-      ],
+                selectedColor: Colors.black,
+                icon: const Icon(Icons.check_circle_outline,),
+                title: const Text('Done Tasks')),
+            MoltenTab(
+                unselectedColor: Colors.grey.withOpacity(0.8),
+                selectedColor: Colors.black,
+                icon: const Icon(Icons.archive,),
+                title: const Text('Archive Tasks')),
+            MoltenTab(
+                unselectedColor: Colors.grey.withOpacity(0.8),
+                selectedColor: Colors.black,
+                icon: const Icon(Icons.settings,),
+                title: const Text('Settings')),
+
+        ],
+        ),
       ),
       body: PageView(
         controller: pageController,
@@ -104,43 +99,27 @@ class _HomeViewState extends State<HomeView> {
           Settings()
         ]
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white,
-        onPressed: () {
-          if(!isShowingBottomSheet) {
-            client.createTable();
-            scaffoldKey.currentState!.showBottomSheet((context) => AddBottomSheet(formKey:formKey,
-              addressController: addressController, phoneController: phoneController, nameController: nameController ,)
-            ).closed.then((value)  {
-                  setState(() {
-              floatIcon=Icons.add;
-              isShowingBottomSheet=false;
-            });
-                });
-            setState(() {
-              floatIcon=Icons.edit;
-              isShowingBottomSheet=true;
-            });
-          } else{
-            if(formKey.currentState!.validate()){
-              client.insertToTable(
-                  name: nameController.text,
-                  phone: phoneController.text,
-                  address: addressController.text,);
-              Navigator.pop(context);
-              setState(() {
-                floatIcon=Icons.add;
-                isShowingBottomSheet=false;
-              });
-            }
+      floatingActionButton:currentIndex == 0 && Provider.of<ContactProvider>(context).isBottomSheet==false?
+          Consumer<ContactProvider>(builder:((context, contactProvider, child )
+            {
+              return FloatingActionButton(
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.add, color: Colors.black,),
+            onPressed: () async {
+              await contactProvider.bottomSheetMode();
+              showModalBottomSheet(
+                isScrollControlled: true,
+                context: context,
+                builder: (context) {
+                  return  AddBottomSheet();
+                  },
+              ).then((value) async {
+              log('bottom Sheet ended');
+              await contactProvider.nonBottomSheetMode();});
 
-
-          }
-        },
-        child:Icon(floatIcon,color: Colors.black,) ,
-
-
-      ),
+            // scaffoldKey.currentState!.showBottomSheet((context) =>  const AddBottomSheet());
+            });}))
+      : const SizedBox()
     );
   }
 

@@ -9,6 +9,7 @@ class Images {
   static const String favIcon = '';
   static const String profileIcon = '';
   static const String chatIcon = '';
+  static const String checkMarkIcon = 'assets/icons/check_mark.png';
   static const String searchIcon = '';
   static const String paymentsIcon = '';
   static const String notificationIcon = '';

@@ -2,11 +2,13 @@ import 'package:sqflite/sqflite.dart';
 abstract class  SqfLite{
   late Database db;
 
-  Future <dynamic> createTable();
+  Future <dynamic> createTableFromDatabase({required String tableName,required String text1,required String text2,required String text3,});
 
-  Future <dynamic> insertToTable({required String name,
-    required String phone,required String address,});
+  Future <dynamic> insertToTableFromDatabase({ required String tableName,required String text1,required String text2,required String text3,required String text1Value,
+    required String text2Value,required String text3Value,});
 
-  Future <dynamic> getTable({required Database db});
+  Future <dynamic> getTableFromDatabase({required String tableName});
+
+  Future<dynamic> deleteDataFromTable({ required String tableName,required int id});
 
 }

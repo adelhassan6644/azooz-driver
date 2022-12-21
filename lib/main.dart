@@ -1,5 +1,7 @@
 import 'package:azooz_diver/presentation/home_view/home_view.dart';
 import 'package:azooz_diver/presentation/splash/splash.dart';
+import 'package:azooz_diver/provider/home_provider/contact_proider.dart';
+import 'package:azooz_diver/provider/them_provider/them_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:azooz_diver/di.dart' as di;
@@ -16,12 +18,15 @@ Future<void> main() async {
 
   await di.init();
 
-  // runApp(MultiProvider(providers: const [
-  //
-  // ],
-  //     child: const MyApp()
-  // ));
-runApp(const MyApp());
+  runApp(
+      MultiProvider(
+          providers:  [
+            ChangeNotifierProvider(create: (context) => di.sl<ContactProvider>()),
+            ChangeNotifierProvider(create: (context) => di.sl<ThemProvider>()),
+          ],
+      child: const MyApp()
+  ));
+
 
 }
 
@@ -31,6 +36,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
       title: 'Azooz Driver',
       theme: ThemeData(
         primarySwatch: Colors.blue,
